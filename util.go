@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/url"
+	"sync"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -43,4 +44,26 @@ func makeURLAbsolute(href, base *url.URL) *url.URL {
 func removeQueryString(url *url.URL) *url.URL {
 	url.RawQuery = ""
 	return url
+}
+
+// SafeSet is a set suitable for concurrent situations that locks during reads and writes
+type SafeSet struct {
+	set  map[string]bool
+	lock sync.Mutex
+}
+
+// Add adds a value to the SafeSet
+func (s *SafeSet) Add(str string) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	s.set[str] = true
+}
+
+// Contains returns true if the string is in the SafeSet
+func (s *SafeSet) Contains(str string) bool {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	return s.set[str]
 }
