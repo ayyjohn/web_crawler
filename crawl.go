@@ -3,8 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"os"
 )
 
@@ -23,14 +21,5 @@ func main() {
 }
 
 func retrieve(uri string) {
-	resp, err := http.Get(uri)
-
-	if err != nil {
-		return
-	}
-
-	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll(resp.Body)
-
-	fmt.Println(string(body))
+	fmt.Println(ScrapeLinks(uri))
 }
