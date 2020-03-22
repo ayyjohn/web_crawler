@@ -23,16 +23,15 @@ func main() {
 }
 
 func enqueueLinks(uri string, queue chan string) {
-	fmt.Println("fetching", uri)
-	visitedURLs.Add(uri)
-	if visitedURLs.Length()%25 == 0 {
-		fmt.Printf("fetched %v links\n", visitedURLs.Length())
-	}
-	links := ScrapeLinks(uri)
-	for _, link := range links {
-		absoluteLink := FixURL(link, uri)
-		if uri != "" && !visitedURLs.Contains(uri) {
-			go func(l string) { queue <- l }(absoluteLink)
+	if !visitedURLs.Contains(uri) {
+		fmt.Println("fetching", uri)
+		visitedURLs.Add(uri)
+		links := ScrapeLinks(uri)
+		for _, link := range links {
+			absoluteLink := FixURL(link, uri)
+			if uri != "" && !visitedURLs.Contains(absoluteLink) {
+				go func(l string) { queue <- l }(absoluteLink)
+			}
 		}
 	}
 }
