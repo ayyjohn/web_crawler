@@ -20,17 +20,27 @@ func ScrapeLinks(uri string) []string {
 	return links
 }
 
-// FixURL takes a link and makes it absolute if it isn't
+// FixURL removes the query string from a URL and makes it absolute relative to the baseURL
 func FixURL(href, base string) string {
-	uri, err := url.Parse(href)
-	if err != nil {
-		return ""
-	}
-	baseURL, err := url.Parse(base)
-	if err != nil {
-		return ""
-	}
+	hrefURL, baseURL := parseOrEmpty(href), parseOrEmpty(base)
+	urlWithoutQueryString := removeQueryString(hrefURL)
+	absoluteURL := makeURLAbsolute(urlWithoutQueryString, baseURL)
+	return absoluteURL.String()
+}
 
-	uri = baseURL.ResolveReference(uri)
-	return uri.String()
+func parseOrEmpty(uri string) *url.URL {
+	u, err := url.Parse(uri)
+	if err != nil {
+		panic(err)
+	}
+	return u
+}
+
+func makeURLAbsolute(href, base *url.URL) *url.URL {
+	return base.ResolveReference(href)
+}
+
+func removeQueryString(url *url.URL) *url.URL {
+	url.RawQuery = ""
+	return url
 }
