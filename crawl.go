@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-var visitedURLs = make(map[string]bool)
+var visitedURLs = ConcurrentSet{set: make(map[string]bool)}
 
 func main() {
 	args := parseArgs()
@@ -24,14 +24,14 @@ func main() {
 
 func enqueueLinks(uri string, queue chan string) {
 	fmt.Println("fetching", uri)
-	visitedURLs[uri] = true
-	if len(visitedURLs)%25 == 0 {
-		fmt.Printf("fetched %v links\n", len(visitedURLs))
+	visitedURLs.Add(uri)
+	if visitedURLs.Length()%25 == 0 {
+		fmt.Printf("fetched %v links\n", visitedURLs.Length())
 	}
 	links := ScrapeLinks(uri)
 	for _, link := range links {
 		absoluteLink := FixURL(link, uri)
-		if uri != "" && !visitedURLs[absoluteLink] {
+		if uri != "" && !visitedURLs.Contains(uri) {
 			go func(l string) { queue <- l }(absoluteLink)
 		}
 	}
