@@ -46,22 +46,22 @@ func removeQueryString(url *url.URL) *url.URL {
 	return url
 }
 
-// SafeSet is a set suitable for concurrent situations that locks during reads and writes
-type SafeSet struct {
+// ConcurrentSet is a set suitable for concurrent situations that locks during reads and writes
+type ConcurrentSet struct {
 	set  map[string]bool
 	lock sync.Mutex
 }
 
-// Add adds a value to the SafeSet
-func (s *SafeSet) Add(str string) {
+// Add adds a value to the ConcurrentSet
+func (s *ConcurrentSet) Add(str string) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
 	s.set[str] = true
 }
 
-// Contains returns true if the string is in the SafeSet
-func (s *SafeSet) Contains(str string) bool {
+// Contains returns true if the string is in the ConcurrentSet
+func (s *ConcurrentSet) Contains(str string) bool {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
