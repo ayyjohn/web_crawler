@@ -68,6 +68,7 @@ func (s *ConcurrentSet) Contains(str string) bool {
 	return s.set[str]
 }
 
+// Length returns the number of items in the ConcurrentSet
 func (s *ConcurrentSet) Length() int {
 	return len(s.set)
 }
