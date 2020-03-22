@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net/url"
+
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -16,4 +18,19 @@ func ScrapeLinks(uri string) []string {
 		links = append(links, href)
 	})
 	return links
+}
+
+// FixURL takes a link and makes it absolute if it isn't
+func FixURL(href, base string) string {
+	uri, err := url.Parse(href)
+	if err != nil {
+		return ""
+	}
+	baseURL, err := url.Parse(base)
+	if err != nil {
+		return ""
+	}
+
+	uri = baseURL.ResolveReference(uri)
+	return uri.String()
 }
