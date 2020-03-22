@@ -67,3 +67,7 @@ func (s *ConcurrentSet) Contains(str string) bool {
 
 	return s.set[str]
 }
+
+func (s *ConcurrentSet) Length() int {
+	return len(s.set)
+}
