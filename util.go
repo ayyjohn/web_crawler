@@ -23,18 +23,15 @@ func ScrapeLinks(uri string) []string {
 
 // FixURL removes the query string from a URL and makes it absolute relative to the baseURL
 func FixURL(href, base string) string {
-	hrefURL, baseURL := parseOrEmpty(href), parseOrEmpty(base)
-	urlWithoutQueryString := removeQueryString(hrefURL)
+	linkURL, linkErr := url.Parse(href)
+	baseURL, baseErr := url.Parse(base)
+	if linkErr != nil || baseErr != nil {
+		return ""
+	}
+
+	urlWithoutQueryString := removeQueryString(linkURL)
 	absoluteURL := makeURLAbsolute(urlWithoutQueryString, baseURL)
 	return absoluteURL.String()
-}
-
-func parseOrEmpty(uri string) *url.URL {
-	u, err := url.Parse(uri)
-	if err != nil {
-		panic(err)
-	}
-	return u
 }
 
 func makeURLAbsolute(href, base *url.URL) *url.URL {
@@ -49,7 +46,7 @@ func removeQueryString(url *url.URL) *url.URL {
 // ConcurrentSet is a set suitable for concurrent situations that locks during reads and writes
 type ConcurrentSet struct {
 	set  map[string]bool
-	lock sync.Mutex
+	lock sync.RWMutex
 }
 
 // Add adds a value to the ConcurrentSet
@@ -62,13 +59,16 @@ func (s *ConcurrentSet) Add(str string) {
 
 // Contains returns true if the string is in the ConcurrentSet
 func (s *ConcurrentSet) Contains(str string) bool {
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 
-	return s.set[str]
+	_, ok := s.set[str]
+	return ok
 }
 
-// Length returns the number of items in the ConcurrentSet
+// Length returns the length of the underlying map in the ConcurrentSet
 func (s *ConcurrentSet) Length() int {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 	return len(s.set)
 }
